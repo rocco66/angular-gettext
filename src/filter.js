@@ -8,7 +8,7 @@ angular.module('gettext').filter('translateN', function (gettextCatalog, $interp
     return function (input, n, translatePlural) {
         // Validate filter parameters
         var nIsNumber = typeof(n) === "number",
-            nIsStringNumber = typeof(parseInt(n, 10)) === "number";
+            nIsStringNumber = !isNaN(parseInt(n, 10));
         if (!nIsNumber && !nIsStringNumber) {
             throw new Error("First parameter of translateN must be a number, or a string with number, not " + n + ".");
         }
