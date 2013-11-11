@@ -1,6 +1,9 @@
 if (typeof jQuery === 'undefined') {
   throw new Error('Angular-gettext depends on jQuery, be sure to include it!');
 }
+if (typeof sprintf === 'undefined') {
+  throw new Error('Angular-gettext depends on sprintf, be sure to include it!');
+}
 angular.module('gettext', []);
 angular.module('gettext').factory('gettext', function () {
   return function (str) {
@@ -69,7 +72,7 @@ angular.module('gettext').directive('translate', [
           };
           assert(!attrs.translatePlural || attrs.translateN, 'translate-n', 'translate-plural');
           assert(!attrs.translateN || attrs.translatePlural, 'translate-plural', 'translate-n');
-          var countFn = $parse(attrs.translateN);
+          var countFn = $parse(attrs.translateN), sprintfArgsFn = $parse(attrs.translateArgs), sprintfArgs = sprintfArgsFn($scope);
           transclude($scope, function (clone) {
             var input = $.trim(clone.html());
             clone.removeAttr('translate');
@@ -81,6 +84,16 @@ angular.module('gettext').directive('translate', [
                 translated = gettextCatalog.getPlural(countFn($scope), input, attrs.translatePlural);
               } else {
                 translated = gettextCatalog.getString(input);
+              }
+              if ($.isArray(sprintfArgs)) {
+                translated = vsprintf(translated, sprintfArgs);
+              }
+              var argsType = typeof sprintfArgs;
+              if ([
+                  'object',
+                  'string'
+                ].indexOf(argsType) >= 0) {
+                translated = sprintf(translated, sprintfArgs);
               }
               var interpolated = $interpolate(translated)($scope);
               if (prev === interpolated) {
@@ -100,7 +113,24 @@ angular.module('gettext').filter('translate', [
   '$parse',
   function (gettextCatalog, $interpolate, $parse) {
     return function (input) {
-      return gettextCatalog.getString(input);
+      var translation = gettextCatalog.getString(input), argumentsForSprintf = Array.prototype.slice.call(arguments, 1);
+      return vsprintf(translation, argumentsForSprintf);
+    };
+  }
+]);
+angular.module('gettext').filter('translateN', [
+  'gettextCatalog',
+  function (gettextCatalog) {
+    return function (input, n, translatePlural) {
+      var nIsNumber = typeof n === 'number', nIsStringNumber = !isNaN(parseInt(n, 10));
+      if (!nIsNumber && !nIsStringNumber) {
+        throw new Error('First parameter of translateN must be a number, or a string with number, not ' + n + '.');
+      }
+      if (typeof translatePlural !== 'string') {
+        throw new Error('Second parameter of translateN must be a string with plural form, not ' + n + '.');
+      }
+      var translated = gettextCatalog.getPlural(n, input, translatePlural), isArgumentObject = typeof arguments[3] === 'object' && arguments[3] !== null;
+      return isArgumentObject ? sprintf(translated, arguments[3]) : vsprintf(translated, Array.prototype.slice.call(arguments, 3));
     };
   }
 ]);
