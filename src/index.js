@@ -7,7 +7,7 @@ if (typeof sprintf === 'undefined') {
 
 angular.module('gettext', []);
 
-angular.module('gettext').factory('gettext', function () {
+angular.module('gettext').factory('gettext', function (gettextCatalog) {
     /*
      * Does nothing, simply returns the input string.
      *
@@ -15,6 +15,7 @@ angular.module('gettext').factory('gettext', function () {
      * this string should be extracted for translations.
      */
     return function (str) {
-        return str;
+        var translated = gettextCatalog.getString(str);
+        return translated || str;
     };
 });
