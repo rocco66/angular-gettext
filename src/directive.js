@@ -37,7 +37,8 @@ angular.module('gettext').directive('translate', function (gettextCatalog, $inte
                             translated = vsprintf(translated, sprintfArgs);
                         }
                         var argsType = typeof(sprintfArgs);
-                        if (["object", "string"].indexOf(argsType) >= 0) {
+                        if (argsType === "string" ||
+                            argsType === "object" && sprintfArgs !== null) {
                             translated = sprintf(translated, sprintfArgs);
                         }
 

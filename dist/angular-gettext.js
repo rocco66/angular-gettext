@@ -89,10 +89,7 @@ angular.module('gettext').directive('translate', [
                 translated = vsprintf(translated, sprintfArgs);
               }
               var argsType = typeof sprintfArgs;
-              if ([
-                  'object',
-                  'string'
-                ].indexOf(argsType) >= 0) {
+              if (argsType === 'string' || argsType === 'object' && sprintfArgs !== null) {
                 translated = sprintf(translated, sprintfArgs);
               }
               var interpolated = $interpolate(translated)($scope);

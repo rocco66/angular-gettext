@@ -17,7 +17,6 @@ angular.module('gettext').filter('translateN', function (gettextCatalog) {
         if (typeof(translatePlural) !== "string") {
             throw new Error("Second parameter of translateN must be a string with plural form, not " + n + ".");
         }
-        // console.log(typeof(arguments[3]) === "object", arguments[3] !== null);
         var translated = gettextCatalog.getPlural(n, input, translatePlural),
             isArgumentObject =
                 typeof(arguments[3]) === "object" && arguments[3] !== null;
